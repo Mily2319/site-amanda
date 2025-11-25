@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A Menina das Tranças</title>
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<style>
+  /* Logo responsiva */
+  .logo-img {
+    width: 50%;
+    max-width: 250px;
+    height: auto;
+    margin-bottom: 2rem;
+  }
+
+  /* Botões animados */
+  .day-btn, .time-btn {
+    transition: all 0.2s;
+  }
+  .day-btn:hover, .time-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  }
+
+  /* Preview da foto */
+  #photoPreview {
+    max-width: 150px;
+    max-height: 150px;
+    margin-top: 0.5rem;
+    border-radius: 0.5rem;
+    object-fit: cover;
+    display: none;
+  }
+
+  /* Iframe responsivo */
+  .responsive-iframe {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 0.75rem;
+  }
+</style>
+</head>
+
+<body class="min-h-screen bg-purple-200 text-purple-900 p-4 sm:p-6 flex flex-col items-center">
+
+<!-- LOGO CENTRALIZADA -->
+<img src="img/ChatGPT Image 24 de nov. de 2025, 23_48_43.png" alt="Borboleta Logo" class="logo-img">
+
+<!-- Navegação -->
+<div class="flex flex-wrap justify-center gap-4 w-full mb-6">
+  <button onclick="setView('cliente')" class="p-2 bg-purple-500 text-white rounded-xl shadow w-full sm:w-auto">Cliente</button>
+  <button onclick="setView('trancista')" class="p-2 bg-purple-800 text-white rounded-xl shadow w-full sm:w-auto">Trancista</button>
+</div>
+
+
+<!-- CLIENTE -->
+<div id="cliente" class="max-w-xl w-full bg-purple-100 p-4 sm:p-6 rounded-2xl space-y-4 shadow-xl">
+
+  <h2 class="text-lg sm:text-xl font-bold">Seu nome</h2>
+  <input id="clientName" class="w-full p-2 rounded bg-purple-50 border border-purple-300" placeholder="Digite seu nome" />
+
+  <h2 class="text-lg sm:text-xl font-bold mt-4">Escolha o dia</h2>
+  <div id="dayButtons" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+
+  <h2 class="text-lg sm:text-xl font-bold mt-4">Escolha um horário disponível</h2>
+  <div id="timeButtons" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+  <p id="warning" class="text-red-600 font-bold text-center hidden">Por favor, preencha todos os campos corretamente!</p>
+
+  <p class="text-sm text-purple-700 mt-2">Envie o modelo da trança:</p>
+  <input type="file" id="photo" class="w-full" accept="image/*" />
+  <img id="photoPreview" />
+
+  <button onclick="handleSchedule()" class="w-full p-2 bg-purple-600 text-white rounded-xl mt-4">Confirmar</button>
+  <p id="successMsg" class="text-green-600 text-center text-lg font-bold mt-4 hidden">Horário agendado com sucesso!</p>
+
+  <a href="https://w.app/ameninadastrancas" target="_blank" class="block text-center mt-4 p-2 bg-green-500 text-white rounded-xl">Suporte via WhatsApp</a>
+</div>
+
+<!-- TRANCISTA -->
+<div id="trancista" class="max-w-xl w-full bg-purple-100 p-4 sm:p-6 rounded-2xl space-y-4 shadow-xl" style="display:none;">
+  <h2 class="text-lg sm:text-xl font-bold">Horários agendados</h2>
+  <div id="appointmentsList"></div>
+</div>
+
+<script>
+let view = "cliente";
+let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
+let lastReset = localStorage.getItem("lastReset");
+
+// Função para resetar toda segunda-feira
+function checkWeeklyReset() {
+    const today = new Date();
+    const currentWeekMonday = new Date(today);
+    currentWeekMonday.setDate(today.getDate() - today.getDay() + 1); // segunda-feira desta semana
+    currentWeekMonday.setHours(0,0,0,0);
+
+    if (lastReset) {
+        const lastResetDate = new Date(lastReset);
+        lastResetDate.setHours(0,0,0,0);
+
+        // Se o último reset foi antes da segunda desta semana → resetar
+        if (lastResetDate < currentWeekMonday) {
+            appointments = [];
+            localStorage.setItem("appointments", JSON.stringify(appointments));
+            localStorage.setItem("lastReset", today.toISOString());
+        }
+    } else {
+        // Primeira vez acessando — salva o primeiro reset
+        localStorage.setItem("lastReset", today.toISOString());
+    }
+}
+
+checkWeeklyReset();
+
+// HORÁRIOS
+const schedule = {
+    "Segunda": ["08:00","09:00","10:00","11:00"],
+    "Sábado": ["14:00","15:00","16:00","17:00","18:00"],
+    "Domingo": ["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00"]
+};
+
+let selectedDay = null;
+let selectedTime = null;
+
+function setView(v) {
+    view = v;
+    document.getElementById("cliente").style.display = v === "cliente" ? "block" : "none";
+    document.getElementById("trancista").style.display = v === "trancista" ? "block" : "none";
+
+    if (v === "trancista") renderAppointments();
+}
+
+function loadDays() {
+    const div = document.getElementById("dayButtons");
+    div.innerHTML = "";
+    Object.keys(schedule).forEach(day => {
+        const btn = document.createElement("button");
+        btn.className = "p-2 rounded-xl border bg-purple-50 day-btn text-sm sm:text-base";
+        btn.innerText = day;
+        btn.onclick = () => {
+            selectedDay = day;
+            loadTimes();
+        };
+        div.appendChild(btn);
+    });
+}
+
+function loadTimes() {
+    const div = document.getElementById("timeButtons");
+    div.innerHTML = "";
+    if (!selectedDay) return;
+
+    const takenTimes = appointments
+        .filter(a => a.day === selectedDay)
+        .map(a => a.time);
+
+    schedule[selectedDay].forEach(time => {
+        if (!takenTimes.includes(time)) {
+            const btn = document.createElement("button");
+            btn.className = "p-2 rounded-xl border time-btn bg-purple-50 text-sm sm:text-base";
+            btn.innerText = time;
+            btn.onclick = () => { selectedTime = time; };
+            div.appendChild(btn);
+        }
+    });
+}
+
+document.getElementById("photo").addEventListener('change', function(event){
+    const preview = document.getElementById('photoPreview');
+    if(event.target.files[0]){
+        preview.src = URL.createObjectURL(event.target.files[0]);
+        preview.style.display = 'block';
+    } else {
+        preview.style.display = 'none';
+    }
+});
+
+function handleSchedule() {
+    const name = document.getElementById("clientName").value;
+
+    if (!name || !selectedDay || !selectedTime) {
+        document.getElementById("warning").classList.remove("hidden");
+        return;
+    }
+
+    document.getElementById("warning").classList.add("hidden");
+
+    const photo = document.getElementById("photo").files[0];
+
+    const newAppointment = {
+        clientName: name,
+        day: selectedDay,
+        time: selectedTime,
+        photo: photo ? URL.createObjectURL(photo) : null
+    };
+
+    appointments.push(newAppointment);
+    localStorage.setItem('appointments', JSON.stringify(appointments));
+
+    document.getElementById("successMsg").classList.remove("hidden");
+
+    selectedDay = null;
+    selectedTime = null;
+    document.getElementById("clientName").value = '';
+    document.getElementById("photo").value = '';
+    document.getElementById("photoPreview").style.display = 'none';
+
+    loadDays();
+    loadTimes();
+}
+
+function renderAppointments() {
+    const div = document.getElementById("appointmentsList");
+    div.innerHTML = "";
+
+    if (appointments.length === 0) {
+        div.innerHTML = "<p>Nenhum horário agendado.</p>";
+        return;
+    }
+
+    appointments.forEach(a => {
+        const card = document.createElement("div");
+        card.className = "bg-purple-200 p-4 rounded-xl space-y-2 shadow";
+        card.innerHTML = `
+            <p class="font-bold text-sm sm:text-base">Cliente: ${a.clientName}</p>
+            <p class="font-bold text-sm sm:text-base">Dia: ${a.day}</p>
+            <p class="font-bold text-sm sm:text-base">Horário: ${a.time}</p>
+            ${a.photo ? `<img class="w-full max-w-xs h-auto rounded-xl object-cover" src="${a.photo}"/>` : ""}
+        `;
+        div.appendChild(card);
+    });
+}
+
+loadDays();
+loadTimes();
+</script>
+</body>
+</html>
