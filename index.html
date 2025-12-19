@@ -1,239 +1,231 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>A Menina das Tranças</title>
-<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A Menina das Tranças | Agendamento</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
-  /* Logo responsiva */
-  .logo-img {
-    width: 50%;
-    max-width: 250px;
-    height: auto;
-    margin-bottom: 2rem;
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Poppins', sans-serif;
   }
 
-  /* Botões animados */
-  .day-btn, .time-btn {
-    transition: all 0.2s;
-  }
-  .day-btn:hover, .time-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  .font-logo {
+    font-family: 'Great Vibes', cursive;
+    letter-spacing: 1px;
   }
 
-  /* Preview da foto */
-  #photoPreview {
-    max-width: 150px;
-    max-height: 150px;
-    margin-top: 0.5rem;
-    border-radius: 0.5rem;
-    object-fit: cover;
-    display: none;
-  }
-
-  /* Iframe responsivo */
-  .responsive-iframe {
-    width: 100%;
-    aspect-ratio: 16/9;
-    border-radius: 0.75rem;
-  }
+  body.dark { background-color: #1e1b4b; color: #f3f3f3; }
+  body.dark .bg-purple-100 { background-color: #2a254a; }
+  body.dark .bg-purple-50 { background-color: #332f5a; }
+  body.dark .text-purple-700 { color: #c0b5ff; }
+  body.dark .bg-purple-200 { background-color: #3b3470; }
 </style>
+
 </head>
+<body class="min-h-screen bg-purple-200 flex items-center justify-center p-4 transition-colors duration-500" id="body">
 
-<body class="min-h-screen bg-purple-200 text-purple-900 p-4 sm:p-6 flex flex-col items-center">
+  <main class="w-full max-w-xl bg-purple-100 rounded-2xl shadow-2xl p-6 space-y-6 transition-colors duration-500">
 
-<!-- LOGO CENTRALIZADA -->
-<img src="img/ChatGPT Image 24 de nov. de 2025, 23_48_43.png" alt="Borboleta Logo" class="logo-img">
+    <!-- LOGO -->
+    <header class="text-center space-y-2">
+      <img src="img/logo.png" alt="Logo A Menina das Tranças" class="mx-auto w-32 sm:w-40 md:w-48" />
+      <p class="text-sm text-purple-700">Agendamento online simples e rápido</p>
+      <button onclick="toggleDark()" class="text-xs underline text-purple-600 hover:text-purple-800">Alternar modo escuro</button>
+    </header>
 
-<!-- Navegação -->
-<div class="flex flex-wrap justify-center gap-4 w-full mb-6">
-  <button onclick="setView('cliente')" class="p-2 bg-purple-500 text-white rounded-xl shadow w-full sm:w-auto">Cliente</button>
-  <button onclick="setView('trancista')" class="p-2 bg-purple-800 text-white rounded-xl shadow w-full sm:w-auto">Trancista</button>
-</div>
+    <!-- CARROSSEL -->
+    <section class="relative overflow-hidden rounded-xl bg-purple-200 transition-colors duration-500">
+      <div class="flex transition-transform duration-500 ease-in-out" id="carousel">
+        <img src="img/tranca1-1.png" alt="Trança 1">
+<img src="img/tranca1-2.png" alt="Trança 2">
+<img src="img/tranca1-3.png" alt="Trança 3">
+<img src="img/tranca1-4.png" alt="Trança 4">
+<img src="img/tranca1-5.png" alt="Trança 5">
+<img src="img/tranca1-6.png" alt="Trança 6">
 
 
-<!-- CLIENTE -->
-<div id="cliente" class="max-w-xl w-full bg-purple-100 p-4 sm:p-6 rounded-2xl space-y-4 shadow-xl">
+      </div>
 
-  <h2 class="text-lg sm:text-xl font-bold">Seu nome</h2>
-  <input id="clientName" class="w-full p-2 rounded bg-purple-50 border border-purple-300" placeholder="Digite seu nome" />
+      <button onclick="prevSlide()" class="absolute left-3 top-1/2 -translate-y-1/2 bg-purple-600/80 text-white px-4 py-2 rounded-full hover:bg-purple-700">‹</button>
+      <button onclick="nextSlide()" class="absolute right-3 top-1/2 -translate-y-1/2 bg-purple-600/80 text-white px-4 py-2 rounded-full hover:bg-purple-700">›</button>
+    </section>
 
-  <h2 class="text-lg sm:text-xl font-bold mt-4">Escolha o dia</h2>
-  <div id="dayButtons" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+   <!-- TABELAS DE VALORES -->
+<section class="bg-purple-50 rounded-xl p-4 transition-colors duration-500 space-y-4">
+  <h2 class="font-logo text-2xl text-purple-700">
+  Tabela de valores
+</h2>
 
-  <h2 class="text-lg sm:text-xl font-bold mt-4">Escolha um horário disponível</h2>
-  <div id="timeButtons" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
-  <p id="warning" class="text-red-600 font-bold text-center hidden">Por favor, preencha todos os campos corretamente!</p>
 
-  <p class="text-sm text-purple-700 mt-2">Envie o modelo da trança:</p>
-  <input type="file" id="photo" class="w-full" accept="image/*" />
-  <img id="photoPreview" />
+  <!-- Valores simples -->
+  <ul class="text-sm list-disc ml-4 space-y-1">
+    <li>1 ou 2 tranças — <strong>R$ 20</strong></li>
+    <li>3 ou 4 tranças — <strong>R$ 25</strong></li>
+    <li>5 ou 6 tranças — <strong>R$ 30</strong></li>
+    <li>7 ou 8 tranças — <strong>R$ 35</strong></li>
+    <li>Tiara até 6 tranças — <strong>R$ 45</strong></li>
+    <li>Tiara + de 6 tranças — <strong>R$ 50</strong></li>
+    <li>Boxeadora simples — <strong>R$ 45</strong></li>
+    <li>Boxeadora com detalhe — <strong>R$ 50</strong></li>
+    <li>Boxeadora com extensão — <strong>R$ 70</strong></li>
+  </ul>
 
-  <button onclick="handleSchedule()" class="w-full p-2 bg-purple-600 text-white rounded-xl mt-4">Confirmar</button>
-  <p id="successMsg" class="text-green-600 text-center text-lg font-bold mt-4 hidden">Horário agendado com sucesso!</p>
+  <!-- Valores avançados -->
+  <div class="space-y-4 mt-4">
+    <div class="text-sm">
+      <p class="font-semibold">Tranças Nagô</p>
+      <ul class="ml-4 list-disc">
+        <li>Até 5 tranças — <strong>R$ 100</strong></li>
+        <li>Até 10 tranças — <strong>R$ 150</strong></li>
+        <li>Até 15 tranças — <strong>R$ 200</strong></li>
+        <li>Mais que 15 tranças — <strong>R$ 250</strong></li>
+      </ul>
+    </div>
 
-  <a href="https://w.app/ameninadastrancas" target="_blank" class="block text-center mt-4 p-2 bg-green-500 text-white rounded-xl">Suporte via WhatsApp</a>
-</div>
+    <div class="text-sm">
+      <p class="font-semibold">Tranças Masculinas <span class="text-xs text-purple-700">(material incluso)</span></p>
+      <ul class="ml-4 list-disc">
+        <li>Até 5 tranças — <strong>R$ 100</strong></li>
+        <li>De 6 a 10 tranças — <strong>R$ 130</strong></li>
+        <li>De 11 a 15 tranças — <strong>R$ 150</strong></li>
+      </ul>
+    </div>
 
-<!-- TRANCISTA -->
-<div id="trancista" class="max-w-xl w-full bg-purple-100 p-4 sm:p-6 rounded-2xl space-y-4 shadow-xl" style="display:none;">
-  <h2 class="text-lg sm:text-xl font-bold">Horários agendados</h2>
-  <div id="appointmentsList"></div>
-</div>
+    <div class="text-sm">
+      <p class="font-semibold">Tranças com Cachos <span class="text-xs text-purple-700">(material incluso)</span></p>
+      <ul class="ml-4 list-disc">
+        <li>Chanel — <strong>R$ 300</strong></li>
+        <li>Costas — <strong>R$ 320</strong></li>
+        <li>Cintura — <strong>R$ 350</strong></li>
+      </ul>
+    </div>
 
-<script>
-let view = "cliente";
-let appointments = JSON.parse(localStorage.getItem('appointments')) || [];
-let lastReset = localStorage.getItem("lastReset");
+    <div class="text-sm">
+      <p class="font-semibold">Tranças Afro / Boxeadora Estilizada</p>
+      <ul class="ml-4 list-disc">
+        <li>Simples — <strong>R$ 45</strong></li>
+        <li>Com detalhe — <strong>R$ 50</strong></li>
+        <li>Com extensão — <strong>R$ 70</strong></li>
+      </ul>
+    </div>
+  </div>
+</section>
 
-// Função para resetar toda segunda-feira
-function checkWeeklyReset() {
-    const today = new Date();
-    const currentWeekMonday = new Date(today);
-    currentWeekMonday.setDate(today.getDate() - today.getDay() + 1); // segunda-feira desta semana
-    currentWeekMonday.setHours(0,0,0,0);
+<!-- FORMULÁRIO DE AGENDAMENTO -->
+<section class="space-y-4">
+  <input id="name" class="w-full p-2 rounded border" placeholder="Seu nome" />
 
-    if (lastReset) {
-        const lastResetDate = new Date(lastReset);
-        lastResetDate.setHours(0,0,0,0);
+  <select id="service" class="w-full p-2 rounded border" onchange="updateValue()">
+    <option value="">Escolha o serviço</option>
+    <option value="20">1 ou 2 tranças — R$20</option>
+    <option value="25">3 ou 4 tranças — R$25</option>
+    <option value="30">5 ou 6 tranças — R$30</option>
+    <option value="35">7 ou 8 tranças — R$35</option>
+    <option value="45">Tiara até 6 tranças — R$45</option>
+    <option value="50">Tiara + de 6 tranças — R$50</option>
+    <option value="45">Boxeadora simples — R$45</option>
+    <option value="50">Boxeadora com detalhe — R$50</option>
+    <option value="70">Boxeadora com extensão — R$70</option>
+    <option value="100">Tranças Nagô até 5 — R$100</option>
+    <option value="150">Tranças Nagô até 10 — R$150</option>
+    <option value="200">Tranças Nagô até 15 — R$200</option>
+    <option value="250">Tranças Nagô +15 — R$250</option>
+    <option value="100">Tranças Masculinas até 5 — R$100</option>
+    <option value="130">Tranças Masculinas 6 a 10 — R$130</option>
+    <option value="150">Tranças Masculinas 11 a 15 — R$150</option>
+    <option value="300">Tranças com Cachos Chanel — R$300</option>
+    <option value="320">Tranças com Cachos Costas — R$320</option>
+    <option value="350">Tranças com Cachos Cintura — R$350</option>
+  </select>
+</section>
+      <div class="bg-purple-200 p-3 rounded-xl text-sm transition-colors duration-500">
+        <p><strong>Pagamento antecipado obrigatório</strong></p>
+        <p id="deposit" class="font-bold">Valor da garantia: R$ 0,00</p>
+        <label class="flex items-center mt-2">
+          <input type="checkbox" id="agree" class="mr-2" /> Estou ciente
+        </label>
+      </div>
 
-        // Se o último reset foi antes da segunda desta semana → resetar
-        if (lastResetDate < currentWeekMonday) {
-            appointments = [];
-            localStorage.setItem("appointments", JSON.stringify(appointments));
-            localStorage.setItem("lastReset", today.toISOString());
-        }
-    } else {
-        // Primeira vez acessando — salva o primeiro reset
-        localStorage.setItem("lastReset", today.toISOString());
+      <div>
+        <label class="text-sm">Envie referência da trança (opcional)</label>
+        <input type="file" accept="image/*" class="w-full text-sm" />
+      </div>
+
+      <select id="day" class="w-full p-2 rounded border">
+        <option>Segunda</option>
+        <option>Sábado</option>
+        <option>Domingo</option>
+      </select>
+
+      <select id="time" class="w-full p-2 rounded border">
+        <option>08:00</option>
+        <option>09:00</option>
+        <option>10:00</option>
+        <option>14:00</option>
+        <option>15:00</option>
+        <option>16:00</option>
+      </select>
+
+      <button onclick="sendWhats()" class="w-full bg-purple-600 text-white p-3 rounded-xl font-bold hover:bg-purple-700 transition-colors duration-300">
+        Confirmar agendamento
+      </button>
+
+      <p id="error" class="hidden text-red-600 text-center">Preencha tudo corretamente.</p>
+    </section>
+
+  </main>
+
+  <!-- SCRIPTS -->
+  <script>
+    // CARROSSEL
+    let index = 0;
+    const slides = document.querySelectorAll('#carousel img');
+    const total = slides.length;
+
+    function showSlide() {
+      document.getElementById('carousel').style.transform = `translateX(-${index * 100}%)`;
     }
-}
-
-checkWeeklyReset();
-
-// HORÁRIOS
-const schedule = {
-    "Segunda": ["08:00","09:00","10:00","11:00"],
-    "Sábado": ["14:00","15:00","16:00","17:00","18:00"],
-    "Domingo": ["08:00","09:00","10:00","11:00","12:00","13:00","14:00","15:00","16:00","17:00","18:00"]
-};
-
-let selectedDay = null;
-let selectedTime = null;
-
-function setView(v) {
-    view = v;
-    document.getElementById("cliente").style.display = v === "cliente" ? "block" : "none";
-    document.getElementById("trancista").style.display = v === "trancista" ? "block" : "none";
-
-    if (v === "trancista") renderAppointments();
-}
-
-function loadDays() {
-    const div = document.getElementById("dayButtons");
-    div.innerHTML = "";
-    Object.keys(schedule).forEach(day => {
-        const btn = document.createElement("button");
-        btn.className = "p-2 rounded-xl border bg-purple-50 day-btn text-sm sm:text-base";
-        btn.innerText = day;
-        btn.onclick = () => {
-            selectedDay = day;
-            loadTimes();
-        };
-        div.appendChild(btn);
-    });
-}
-
-function loadTimes() {
-    const div = document.getElementById("timeButtons");
-    div.innerHTML = "";
-    if (!selectedDay) return;
-
-    const takenTimes = appointments
-        .filter(a => a.day === selectedDay)
-        .map(a => a.time);
-
-    schedule[selectedDay].forEach(time => {
-        if (!takenTimes.includes(time)) {
-            const btn = document.createElement("button");
-            btn.className = "p-2 rounded-xl border time-btn bg-purple-50 text-sm sm:text-base";
-            btn.innerText = time;
-            btn.onclick = () => { selectedTime = time; };
-            div.appendChild(btn);
-        }
-    });
-}
-
-document.getElementById("photo").addEventListener('change', function(event){
-    const preview = document.getElementById('photoPreview');
-    if(event.target.files[0]){
-        preview.src = URL.createObjectURL(event.target.files[0]);
-        preview.style.display = 'block';
-    } else {
-        preview.style.display = 'none';
+    function nextSlide() {
+      index = (index + 1) % total;
+      showSlide();
     }
-});
+    function prevSlide() {
+      index = (index - 1 + total) % total;
+      showSlide();
+    }
+    setInterval(nextSlide, 4000);
 
-function handleSchedule() {
-    const name = document.getElementById("clientName").value;
+    // ATUALIZA VALOR DA GARANTIA
+    function updateValue() {
+      const v = document.getElementById('service').value;
+      document.getElementById('deposit').innerText = v ? `Valor da garantia: R$ ${(v/2).toFixed(2)}` : 'Valor da garantia: R$ 0,00';
+    }
 
-    if (!name || !selectedDay || !selectedTime) {
-        document.getElementById("warning").classList.remove("hidden");
+    // ENVIA MENSAGEM PARA WHATSAPP
+    function sendWhats() {
+      const name = document.getElementById('name').value;
+      const service = document.getElementById('service');
+      const value = service.value;
+      const agree = document.getElementById('agree').checked;
+
+      if (!name || !value || !agree) {
+        document.getElementById('error').classList.remove('hidden');
         return;
+      }
+
+      const msg = encodeURIComponent(`Olá! Meu nome é ${name}. Quero agendar ${service.options[service.selectedIndex].text}. Valor total R$${value}. Garantia R$${(value/2).toFixed(2)}.`);
+      window.location.href = `https://wa.me/5561995555725?text=${msg}`;
     }
 
-    document.getElementById("warning").classList.add("hidden");
-
-    const photo = document.getElementById("photo").files[0];
-
-    const newAppointment = {
-        clientName: name,
-        day: selectedDay,
-        time: selectedTime,
-        photo: photo ? URL.createObjectURL(photo) : null
-    };
-
-    appointments.push(newAppointment);
-    localStorage.setItem('appointments', JSON.stringify(appointments));
-
-    document.getElementById("successMsg").classList.remove("hidden");
-
-    selectedDay = null;
-    selectedTime = null;
-    document.getElementById("clientName").value = '';
-    document.getElementById("photo").value = '';
-    document.getElementById("photoPreview").style.display = 'none';
-
-    loadDays();
-    loadTimes();
-}
-
-function renderAppointments() {
-    const div = document.getElementById("appointmentsList");
-    div.innerHTML = "";
-
-    if (appointments.length === 0) {
-        div.innerHTML = "<p>Nenhum horário agendado.</p>";
-        return;
+    // TOGGLE MODO ESCURO
+    function toggleDark() {
+      document.body.classList.toggle('dark');
     }
+  </script>
 
-    appointments.forEach(a => {
-        const card = document.createElement("div");
-        card.className = "bg-purple-200 p-4 rounded-xl space-y-2 shadow";
-        card.innerHTML = `
-            <p class="font-bold text-sm sm:text-base">Cliente: ${a.clientName}</p>
-            <p class="font-bold text-sm sm:text-base">Dia: ${a.day}</p>
-            <p class="font-bold text-sm sm:text-base">Horário: ${a.time}</p>
-            ${a.photo ? `<img class="w-full max-w-xs h-auto rounded-xl object-cover" src="${a.photo}"/>` : ""}
-        `;
-        div.appendChild(card);
-    });
-}
-
-loadDays();
-loadTimes();
-</script>
 </body>
 </html>
