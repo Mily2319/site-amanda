@@ -40,12 +40,13 @@
     <!-- CARROSSEL -->
     <section class="relative overflow-hidden rounded-xl bg-purple-200 transition-colors duration-500">
       <div class="flex transition-transform duration-500 ease-in-out" id="carousel">
-        <img src="img/tranca1-1.png" alt="Trança 1">
-<img src="img/tranca1-2.png" alt="Trança 2">
-<img src="img/tranca1-3.png" alt="Trança 3">
-<img src="img/tranca1-4.png" alt="Trança 4">
-<img src="img/tranca1-5.png" alt="Trança 5">
-<img src="img/tranca1-6.png" alt="Trança 6">
+        <img src="img/tranca1-1.png" class="w-full flex-shrink-0 object-cover" alt="Trança 1">
+<img src="img/tranca1-2.png" class="w-full flex-shrink-0 object-cover" alt="Trança 2">
+<img src="img/tranca1-3.png" class="w-full flex-shrink-0 object-cover" alt="Trança 3">
+<img src="img/tranca1-4.png" class="w-full flex-shrink-0 object-cover" alt="Trança 4">
+<img src="img/tranca1-5.png" class="w-full flex-shrink-0 object-cover" alt="Trança 5">
+<img src="img/tranca1-6.png" class="w-full flex-shrink-0 object-cover" alt="Trança 6">
+
 
 
       </div>
@@ -115,6 +116,7 @@
   </div>
 </section>
 
+
 <!-- FORMULÁRIO DE AGENDAMENTO -->
 <section class="space-y-4">
   <input id="name" class="w-full p-2 rounded border" placeholder="Seu nome" />
@@ -143,6 +145,13 @@
   </select>
 </section>
       <div class="bg-purple-200 p-3 rounded-xl text-sm transition-colors duration-500">
+        <div class="bg-purple-200 border border-purple-400 p-4 rounded-xl text-sm text-purple-800">
+  ⚠️ <strong>Atenção:</strong><br>
+  • É <strong>obrigatório</strong> enviar o <strong>modelo da trança</strong> desejada.<br>
+  • O <strong>comprovante da taxa antecipada</strong> deve ser enviado após o agendamento.<br>
+  • Agendamentos sem essas informações <strong>não serão confirmados</strong>.
+</div>
+
         <p><strong>Pagamento antecipado obrigatório</strong></p>
         <p id="deposit" class="font-bold">Valor da garantia: R$ 0,00</p>
         <label class="flex items-center mt-2">
@@ -162,13 +171,15 @@
       </select>
 
       <select id="time" class="w-full p-2 rounded border">
-        <option>08:00</option>
-        <option>09:00</option>
-        <option>10:00</option>
-        <option>14:00</option>
-        <option>15:00</option>
-        <option>16:00</option>
-      </select>
+  <option value="">Escolha um horário</option>
+  <option value="08:00">08:00</option>
+  <option value="09:00">09:00</option>
+  <option value="10:00">10:00</option>
+  <option value="14:00">14:00</option>
+  <option value="15:00">15:00</option>
+  <option value="16:00">16:00</option>
+</select>
+
 
       <button onclick="sendWhats()" class="w-full bg-purple-600 text-white p-3 rounded-xl font-bold hover:bg-purple-700 transition-colors duration-300">
         Confirmar agendamento
@@ -205,27 +216,66 @@
       document.getElementById('deposit').innerText = v ? `Valor da garantia: R$ ${(v/2).toFixed(2)}` : 'Valor da garantia: R$ 0,00';
     }
 
-    // ENVIA MENSAGEM PARA WHATSAPP
-    function sendWhats() {
-      const name = document.getElementById('name').value;
-      const service = document.getElementById('service');
-      const value = service.value;
-      const agree = document.getElementById('agree').checked;
-
-      if (!name || !value || !agree) {
-        document.getElementById('error').classList.remove('hidden');
-        return;
-      }
-
-      const msg = encodeURIComponent(`Olá! Meu nome é ${name}. Quero agendar ${service.options[service.selectedIndex].text}. Valor total R$${value}. Garantia R$${(value/2).toFixed(2)}.`);
-      window.location.href = `https://wa.me/5561995555725?text=${msg}`;
-    }
+    
 
     // TOGGLE MODO ESCURO
     function toggleDark() {
       document.body.classList.toggle('dark');
     }
-  </script>
+
+  
+  // --- HORÁRIOS OCUPADOS ---
+  const timeSelect = document.getElementById('time');
+  const daySelect = document.getElementById('day');
+
+  function loadUnavailableTimes() {
+    const day = daySelect.value;
+    const booked = JSON.parse(localStorage.getItem(day)) || [];
+
+    [...timeSelect.options].forEach(option => {
+      if (booked.includes(option.value)) {
+        option.style.display = 'none';
+      } else {
+        option.style.display = 'block';
+      }
+    });
+  }
+
+  daySelect.addEventListener('change', loadUnavailableTimes);
+  window.addEventListener('load', loadUnavailableTimes);
+
+  // --- MODIFICA O ENVIO ---
+  function sendWhats() {
+    const name = document.getElementById('name').value;
+    const service = document.getElementById('service');
+    const value = service.value;
+    const agree = document.getElementById('agree').checked;
+    const day = daySelect.value;
+    const time = timeSelect.value;
+
+    if (!name || !value || !agree || !time) {
+      document.getElementById('error').classList.remove('hidden');
+      return;
+    }
+
+    // Salva horário como ocupado
+    const booked = JSON.parse(localStorage.getItem(day)) || [];
+    booked.push(time);
+    localStorage.setItem(day, JSON.stringify(booked));
+
+    const msg = encodeURIComponent(
+      `Olá! Meu nome é ${name}.
+Quero agendar ${service.options[service.selectedIndex].text}.
+📅 Dia: ${day}
+⏰ Horário: ${time}
+
+📌 Enviarei o modelo da trança e o comprovante da taxa antecipada.`
+    );
+
+    window.location.href = `https://wa.me/5561995555725?text=${msg}`;
+  }
+</script>
+
 
 </body>
 </html>
